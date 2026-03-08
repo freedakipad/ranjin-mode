@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>IDE 远程对话</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app">
+        <!-- 头部 -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">⚡</span>
+                    <span class="logo-text">IDE Remote</span>
+                </div>
+                <div class="status-group">
+                    <div class="status-indicator" id="statusIndicator">
+                        <span class="status-dot"></span>
+                        <span class="status-text">连接中...</span>
+                    </div>
+                    <div class="cursor-status" id="ideStatus">
+                        <span class="cursor-dot"></span>
+                        <span class="cursor-text">检查中...</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 聊天区域 -->
+        <main class="chat-container" id="chatContainer">
+            <div class="welcome-screen" id="welcomeScreen">
+                <div class="welcome-icon">🤖</div>
+                <h2>欢迎使用 IDE 远程对话</h2>
+                <p>在下方输入消息，IDE 会在电脑端处理并返回结果</p>
+                <div class="tips">
+                    <div class="tip">💡 IDE 需要在电脑端运行并执行 dialog-trigger</div>
+                    <div class="tip">📱 当 IDE 显示"等待中"时，可发送指令</div>
+                    <div class="tip">🔄 指令将直接发送到 IDE AI 执行</div>
+                </div>
+            </div>
+            <div class="messages" id="messages"></div>
+            <div class="thinking-indicator" id="thinkingIndicator" style="display: none;">
+                <div class="thinking-content">
+                    <div class="thinking-dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <span class="thinking-text">正在发送指令...</span>
+                </div>
+            </div>
+        </main>
+
+        <!-- 输入区域 -->
+        <footer class="input-area">
+            <div class="input-container">
+                <textarea 
+                    id="messageInput" 
+                    placeholder="输入消息..." 
+                    rows="1"
+                    maxlength="4000"
+                ></textarea>
+                <button id="sendButton" class="send-button" disabled>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="input-footer">
+                <span class="char-count" id="charCount">0 / 4000</span>
+                <button class="clear-button" id="clearButton">清空对话</button>
+            </div>
+        </footer>
+
+        <!-- API Key 弹窗 -->
+        <div class="modal" id="apiKeyModal">
+            <div class="modal-content">
+                <h3>🔐 输入 API Key</h3>
+                <p>请输入服务器配置的 API Key 以继续</p>
+                <input type="password" id="apiKeyInput" placeholder="API Key">
+                <button id="apiKeySubmit" class="modal-button">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

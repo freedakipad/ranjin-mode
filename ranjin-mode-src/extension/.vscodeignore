@@ -1,0 +1,9 @@
+# VSIX 打包排除列表
+*.vsix
+.vscodeignore
+.gitignore
+.eslintrc.*
+*.md
+test/
+tests/
+package-lock.json

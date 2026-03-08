@@ -1,0 +1,17 @@
+{
+  "name": "ranjin-relay-server",
+  "version": "1.0.0",
+  "description": "燃尽模式中继服务器 - 支持公网远程对话",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.16.0",
+    "dotenv": "^16.3.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

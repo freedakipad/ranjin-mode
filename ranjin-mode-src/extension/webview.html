@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>燃尽模式</title>
+  <style>
+    :root {
+      --bg0: #0d0d0f;
+      --bg1: rgba(30,30,35,0.85);
+      --bg2: rgba(45,45,55,0.6);
+      --glass: rgba(255,255,255,0.03);
+      --glass-border: rgba(255,255,255,0.08);
+      --text: #e8e8ec;
+      --text2: #8888a0;
+      --accent: #4da3ff;
+      --accent2: #7c5cff;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg0);
+      color: var(--text);
+      padding: 12px;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    /* Logo Header */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: linear-gradient(135deg, rgba(77,163,255,0.15), rgba(124,92,255,0.1));
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      margin-bottom: 12px;
+    }
+    .logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 8px 24px rgba(77,163,255,0.3);
+    }
+    .header-text h1 {
+      font-size: 16px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--text), var(--text2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .header-text p {
+      font-size: 11px;
+      color: var(--text2);
+      margin-top: 2px;
+    }
+
+    /* Card */
+    .card {
+      background: var(--bg1);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+    .card-title {
+      font-size: 11px;
+      color: var(--text2);
+      margin-bottom: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Status Badge */
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: 500;
+      font-size: 12px;
+    }
+    .status-badge.online {
+      background: linear-gradient(135deg, rgba(34,197,94,0.2), rgba(34,197,94,0.05));
+      color: var(--success);
+      border: 1px solid rgba(34,197,94,0.3);
+    }
+    .status-badge.offline {
+      background: linear-gradient(135deg, rgba(239,68,68,0.2), rgba(239,68,68,0.05));
+      color: var(--danger);
+      border: 1px solid rgba(239,68,68,0.3);
+    }
+    .port-info {
+      font-size: 11px;
+      color: var(--text2);
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .stat-item {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 12px 8px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 22px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .stat-value.success {
+      background: linear-gradient(135deg, var(--success), #16a34a);
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+    .stat-value.danger {
+      background: linear-gradient(135deg, var(--danger), #dc2626);
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+    .stat-label {
+      font-size: 10px;
+      color: var(--text2);
+      margin-top: 4px;
+    }
+
+    /* Toggle Switch */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+    }
+    .toggle-label {
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255,255,255,0.1);
+      border-radius: 24px;
+      transition: 0.3s;
+    }
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+    input:checked + .toggle-slider {
+      background: linear-gradient(135deg, var(--success), #16a34a);
+    }
+    input:checked + .toggle-slider:before {
+      transform: translateX(20px);
+    }
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(77,163,255,0.3);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(77,163,255,0.4);
+    }
+    .btn-secondary {
+      background: var(--glass);
+      color: var(--text);
+      border: 1px solid var(--glass-border);
+    }
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      background: var(--bg2);
+    }
+    .btn-danger {
+      background: linear-gradient(135deg, var(--danger), #dc2626);
+      color: #fff;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 12px;
+      font-size: 11px;
+      color: var(--text2);
+    }
+    .footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 12px;
+      z-index: 1000;
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    .toast-success { background: var(--success); color: #fff; }
+    .toast-error { background: var(--danger); color: #fff; }
+    .toast-info { background: var(--accent); color: #fff; }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div id="toast" class="toast"></div>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">🔥</div>
+    <div class="header-text">
+      <h1>燃尽模式</h1>
+      <p>让 AI 持续燃烧输出</p>
+    </div>
+  </div>
+
+  <!-- Main View (本地版 - 无需登录) -->
+  <div id="mainView">
+    <!-- Status Card -->
+    <div class="card">
+      <div class="card-title">服务状态</div>
+      <div class="status-row">
+        <span class="status-badge online" id="statusBadge">🟢 运行中</span>
+        <span class="port-info" id="portInfo">本地版</span>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-label">燃尽模式</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="ranjinToggle" checked onchange="toggleRanjin()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Stats Card -->
+    <div class="card">
+      <div class="card-title">📊 燃尽效果统计</div>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value" id="statTotal">0</div>
+          <div class="stat-label">总弹窗</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value danger" id="statSessions">0</div>
+          <div class="stat-label">会话数</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value success" id="statAvg">0</div>
+          <div class="stat-label">本轮弹窗</div>
+        </div>
+      </div>
+      <div class="compare-box" style="margin-top:12px;padding:10px;background:rgba(62,207,142,0.1);border:1px solid rgba(62,207,142,0.3);border-radius:8px;font-size:11px;color:var(--success);">
+        💡 没有燃尽模式，AI 会在第1次就结束。燃尽帮你多获得了 <strong id="statSaved">0</strong> 次交互！
+      </div>
+    </div>
+
+    <!-- History Card -->
+    <div class="card">
+      <div class="card-title">📚 对话记忆</div>
+      <div class="toggle-row" style="margin-bottom:10px;">
+        <span class="toggle-label">上下文存储</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="historyToggle" checked onchange="toggleHistory()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <button class="btn btn-primary" onclick="showHistory()" style="margin-bottom: 8px;">
+        📂 查看历史记录
+      </button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-secondary" onclick="exportHistory()" style="flex:1;">
+          📤 导出
+        </button>
+        <button class="btn btn-secondary" onclick="importHistory()" style="flex:1;">
+          📥 导入
+        </button>
+      </div>
+    </div>
+    
+    <!-- Remote Service Card (局域网) -->
+    <div class="card">
+      <div class="card-title">📱 局域网远程控制</div>
+      <div class="toggle-row" style="margin-bottom:10px;">
+        <span class="toggle-label">局域网服务</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="remoteToggle" checked onchange="toggleRemote()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div id="remoteInfo" class="hidden" style="margin-bottom:10px;padding:10px;background:rgba(77,163,255,0.1);border:1px solid rgba(77,163,255,0.3);border-radius:8px;">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:6px;">📍 手机访问地址：</div>
+        <div id="remoteUrl" style="font-size:12px;font-weight:600;color:var(--accent);word-break:break-all;margin-bottom:6px;">http://--:--</div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px;">🔑 API Key：</div>
+        <div id="remoteApiKey" style="font-size:11px;color:var(--text);font-family:monospace;word-break:break-all;">--</div>
+      </div>
+      <button class="btn btn-secondary" onclick="copyRemoteInfo()" id="copyRemoteBtn" disabled>
+        📋 复制访问信息
+      </button>
+      <div style="margin-top:8px;font-size:10px;color:var(--text2);text-align:center;">
+        💡 确保手机和电脑在同一 WiFi 网络
+      </div>
+    </div>
+
+    <!-- Relay Service Card (公网中继) -->
+    <div class="card">
+      <div class="card-title">🌐 公网中继服务</div>
+      <div id="relayStatusBar" style="margin-bottom:10px;padding:8px 12px;border-radius:8px;font-size:11px;display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.05);border:1px solid var(--glass-border);">
+        <span id="relayDot" style="width:8px;height:8px;border-radius:50%;background:#666;"></span>
+        <span id="relayStatusText">未连接</span>
+      </div>
+      <div style="margin-bottom:8px;">
+        <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:4px;">中继服务器地址</label>
+        <input type="text" id="relayUrl" placeholder="ws://your-server:8800 或 wss://your-server"
+          style="width:100%;padding:8px 10px;background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;color:var(--text);font-size:12px;outline:none;">
+      </div>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:4px;">API Key</label>
+        <input type="text" id="relayApiKey" placeholder="中继服务器的 API Key"
+          style="width:100%;padding:8px 10px;background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;color:var(--text);font-size:12px;outline:none;">
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary" onclick="startRelay()" id="relayConnectBtn" style="flex:1;">
+          🔗 连接
+        </button>
+        <button class="btn btn-secondary" onclick="stopRelay()" id="relayDisconnectBtn" style="flex:1;" disabled>
+          ⏹️ 断开
+        </button>
+      </div>
+      <div style="margin-top:8px;font-size:10px;color:var(--text2);text-align:center;">
+        🌍 部署 relay-server 到 VPS，即可从任意网络远程控制 AI
+      </div>
+    </div>
+
+  </div>
+
+
+  <script>
+    const vscode = acquireVsCodeApi();
+
+    // 初始化
+    window.addEventListener('load', () => {
+      vscode.postMessage({ type: 'init' });
+    });
+
+    // 接收消息
+    window.addEventListener('message', (event) => {
+      const message = event.data;
+      switch (message.type) {
+        case 'updateData':
+          updateUI(message);
+          break;
+        case 'showToast':
+          showToast(message.message, message.toastType);
+          break;
+        case 'updateStats':
+          updateStats(message.stats);
+          break;
+        case 'updateRemoteStatus':
+          updateRemoteUI(message.data);
+          break;
+      }
+    });
+
+    // 更新 UI（本地版 - 无需登录检查）
+    function updateUI(data) {
+      const mainView = document.getElementById('mainView');
+      mainView.classList.remove('hidden');
+
+      // 更新开关状态
+      const toggle = document.getElementById('ranjinToggle');
+      toggle.checked = data.enabled !== false;
+      
+      // 更新历史存储开关
+      const historyToggle = document.getElementById('historyToggle');
+      if (historyToggle) {
+        historyToggle.checked = data.historyEnabled !== false;
+      }
+
+      // 更新统计
+      if (data.stats) {
+        updateStats(data.stats);
+      }
+      
+      // 更新远程服务状态（局域网 + 中继）
+      updateRemoteUI({
+        enabled: data.remoteEnabled,
+        running: data.remoteRunning,
+        ip: data.remoteIP,
+        port: data.remotePort,
+        apiKey: data.remoteApiKey,
+        relayEnabled: data.relayEnabled,
+        relayConnected: data.relayConnected,
+        relayUrl: data.relayUrl
+      });
+    }
+    
+    // 更新远程服务 UI（局域网 + 中继）
+    function updateRemoteUI(data) {
+      // 局域网
+      const remoteToggle = document.getElementById('remoteToggle');
+      const remoteInfo = document.getElementById('remoteInfo');
+      const remoteUrl = document.getElementById('remoteUrl');
+      const remoteApiKey = document.getElementById('remoteApiKey');
+      const copyBtn = document.getElementById('copyRemoteBtn');
+      
+      if (remoteToggle) {
+        remoteToggle.checked = data.enabled !== false;
+      }
+      
+      if (data.running && data.ip && data.port) {
+        remoteInfo.classList.remove('hidden');
+        remoteUrl.textContent = `http://${data.ip}:${data.port}`;
+        remoteApiKey.textContent = data.apiKey || '--';
+        copyBtn.disabled = false;
+      } else {
+        remoteInfo.classList.add('hidden');
+        copyBtn.disabled = true;
+      }
+      
+      // 中继
+      updateRelayUI(data);
+    }
+    
+    // 更新中继 UI
+    function updateRelayUI(data) {
+      const dot = document.getElementById('relayDot');
+      const text = document.getElementById('relayStatusText');
+      const connectBtn = document.getElementById('relayConnectBtn');
+      const disconnectBtn = document.getElementById('relayDisconnectBtn');
+      const urlInput = document.getElementById('relayUrl');
+      const keyInput = document.getElementById('relayApiKey');
+      
+      if (data.relayConnected) {
+        dot.style.background = '#22c55e';
+        text.textContent = '✅ 已连接到中继服务器';
+        text.style.color = '#22c55e';
+        connectBtn.disabled = true;
+        disconnectBtn.disabled = false;
+      } else if (data.relayEnabled) {
+        dot.style.background = '#f59e0b';
+        text.textContent = '⏳ 正在连接...';
+        text.style.color = '#f59e0b';
+        connectBtn.disabled = true;
+        disconnectBtn.disabled = false;
+      } else {
+        dot.style.background = '#666';
+        text.textContent = '未连接';
+        text.style.color = 'var(--text2)';
+        connectBtn.disabled = false;
+        disconnectBtn.disabled = true;
+      }
+      
+      if (data.relayUrl && urlInput) {
+        urlInput.value = data.relayUrl;
+      }
+    }
+
+    // 更新统计
+    function updateStats(stats) {
+      if (!stats) return;
+      const total = stats.totalCalls || 0;           // 累计总弹窗
+      const currentSession = stats.currentSessionCalls || 0;  // 本轮弹窗
+      const sessionCount = stats.sessionCount || 0;  // 累计会话数
+      // saved = 本轮弹窗数（没有燃尽模式这些交互都不会发生）
+      const saved = currentSession;
+      
+      document.getElementById('statTotal').textContent = total;
+      document.getElementById('statSessions').textContent = sessionCount;  // 显示会话数
+      document.getElementById('statAvg').textContent = currentSession;  // 本轮弹窗
+      document.getElementById('statSaved').textContent = saved;
+    }
+
+    // 切换开关
+    function toggleRanjin() {
+      const enabled = document.getElementById('ranjinToggle').checked;
+      vscode.postMessage({ type: 'toggleRanjin', enabled: enabled });
+    }
+
+    // 切换历史存储
+    function toggleHistory() {
+      const enabled = document.getElementById('historyToggle').checked;
+      vscode.postMessage({ type: 'toggleHistory', enabled: enabled });
+    }
+
+    // 查看历史记录
+    function showHistory() {
+      vscode.postMessage({ type: 'showHistory' });
+    }
+
+    // 导出历史
+    function exportHistory() {
+      vscode.postMessage({ type: 'exportHistory' });
+    }
+
+    // 导入历史
+    function importHistory() {
+      vscode.postMessage({ type: 'importHistory' });
+    }
+
+    // 切换远程服务
+    function toggleRemote() {
+      const enabled = document.getElementById('remoteToggle').checked;
+      vscode.postMessage({ type: 'toggleRemote', enabled: enabled });
+    }
+    
+    // 复制远程信息
+    function copyRemoteInfo() {
+      vscode.postMessage({ type: 'copyRemoteInfo' });
+    }
+    
+    // 连接中继服务器
+    function startRelay() {
+      const url = document.getElementById('relayUrl').value.trim();
+      const apiKey = document.getElementById('relayApiKey').value.trim();
+      
+      if (!url) {
+        showToast('请输入中继服务器地址', 'error');
+        return;
+      }
+      if (!apiKey) {
+        showToast('请输入 API Key', 'error');
+        return;
+      }
+      
+      vscode.postMessage({ type: 'startRelay', url: url, apiKey: apiKey });
+    }
+    
+    // 断开中继
+    function stopRelay() {
+      vscode.postMessage({ type: 'stopRelay' });
+    }
+
+    // 显示 Toast
+    function showToast(text, type = 'info') {
+      const toast = document.getElementById('toast');
+      toast.textContent = text;
+      toast.className = `toast toast-${type} show`;
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+{
+  "name": "ranjin-mode",
+  "displayName": "燃尽模式 - AI持久输出助手",
+  "description": "AI结束前自动弹窗确认，支持手机远程对话，无需激活，支持 Cursor/Windsurf",
+  "version": "7.0.1",
+  "publisher": "ranjin",
+  "icon": "icon.png",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./extension.js",
+  "dependencies": {
+    "ws": "^8.19.0"
+  },
+  "scripts": {
+    "package": "npx --yes @vscode/vsce package",
+    "publish": "npx --yes @vscode/vsce publish"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "ranjin.showPanel",
+        "title": "燃尽模式: 打开面板"
+      },
+      {
+        "command": "ranjin.feedback",
+        "title": "燃尽模式: 手动反馈"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "ranjin.feedback",
+        "key": "ctrl+shift+m",
+        "mac": "cmd+shift+m"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ranjin-panel",
+          "title": "燃尽模式",
+          "icon": "icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "ranjin-panel": [
+        {
+          "type": "webview",
+          "id": "ranjin.mainPanel",
+          "name": "控制面板",
+          "icon": "icon.svg"
+        }
+      ]
+    }
+  }
+}
