@@ -234,6 +234,60 @@ sudo firewall-cmd --reload
 # 云服务器（如腾讯云/阿里云）还需要在安全组中放行端口
 ```
 
+### 域名 + HTTPS 配置（推荐）
+
+国内服务器 HTTP 端口可能被运营商拦截，推荐配置域名 + SSL：
+
+```bash
+# 1. 添加 DNS 解析：A 记录指向服务器 IP
+
+# 2. Nginx 反向代理配置
+# 在 nginx.conf 的 http block 中添加（如果没有）：
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+
+# 3. 创建站点配置 /etc/nginx/sites-enabled/your-domain
+server {
+    listen 80;
+    server_name your-domain.com;
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name your-domain.com;
+
+    ssl_certificate /etc/letsencrypt/live/your-domain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    location / {
+        proxy_pass http://127.0.0.1:8800;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 86400s;
+        proxy_send_timeout 86400s;
+    }
+}
+
+# 4. 使用 Certbot 获取 SSL 证书（DNS 验证方式，适合国内）
+sudo certbot certonly --manual --preferred-challenges dns -d your-domain.com
+
+# 5. 测试并重载 Nginx
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+配置完成后：
+- 📱 手机访问：`https://your-domain.com`
+- 🖥️ 插件中继地址改为：`wss://your-domain.com`（注意是 `wss://` 不是 `ws://`）
+
 ## 侧边栏功能说明
 
 | 功能区域 | 说明 |
@@ -611,6 +665,59 @@ sudo firewall-cmd --reload
 # Cloud providers (AWS, GCP, Tencent Cloud, Alibaba Cloud):
 # also open the port in the security group settings
 ```
+
+### Domain + HTTPS Setup (Recommended)
+
+For production use, set up a domain with SSL using Nginx as a reverse proxy:
+
+```bash
+# 1. Add DNS A record pointing to your server IP
+
+# 2. Add to nginx.conf http block (if not already present):
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+
+# 3. Create site config /etc/nginx/sites-enabled/your-domain
+server {
+    listen 80;
+    server_name your-domain.com;
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name your-domain.com;
+
+    ssl_certificate /etc/letsencrypt/live/your-domain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    location / {
+        proxy_pass http://127.0.0.1:8800;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 86400s;
+        proxy_send_timeout 86400s;
+    }
+}
+
+# 4. Get SSL certificate with Certbot (DNS challenge for China servers)
+sudo certbot certonly --manual --preferred-challenges dns -d your-domain.com
+
+# 5. Test and reload Nginx
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+After setup:
+- 📱 Mobile: `https://your-domain.com`
+- 🖥️ Extension relay URL: `wss://your-domain.com` (note: `wss://` not `ws://`)
 
 ## Sidebar Features
 
